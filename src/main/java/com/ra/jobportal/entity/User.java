@@ -1,5 +1,6 @@
 package com.ra.jobportal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ra.jobportal.entity.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -62,4 +63,8 @@ public class User {
 
     @OneToMany(mappedBy = "employer", cascade = CascadeType.ALL)
     private List<Job> jobs;
+
+    @OneToMany(mappedBy = "candidate")
+    @JsonIgnore
+    private List<Application> applications;
 }

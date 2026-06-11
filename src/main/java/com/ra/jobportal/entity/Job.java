@@ -1,5 +1,6 @@
 package com.ra.jobportal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ra.jobportal.entity.enums.JobStatus;
 import com.ra.jobportal.entity.enums.JobType;
 import jakarta.persistence.*;
@@ -7,6 +8,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "jobs")
@@ -65,7 +67,10 @@ public class Job {
 
     @PreUpdate
     public void preUpdate() {
-
         updatedAt = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "job")
+    @JsonIgnore
+    private List<Application> applications;
 }

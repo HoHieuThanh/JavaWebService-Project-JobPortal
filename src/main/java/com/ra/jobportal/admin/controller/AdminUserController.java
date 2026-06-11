@@ -14,38 +14,19 @@ public class AdminUserController {
     private final UserService userService;
 
     @GetMapping
-    public Page<UserResponse> getUsers(
-
-            @RequestParam(
-                    required = false
-            ) String keyword,
-
-            Pageable pageable
-    ) {
-
-        return userService.getUsers(
-                keyword,
-                pageable
-        );
+    public Page<UserResponse> getUsers(@RequestParam(required = false) String keyword, Pageable pageable) {
+        return userService.getUsers(keyword, pageable);
     }
 
     @PutMapping("/{id}/deactivate")
-    public String deactivateUser(
-            @PathVariable Long id
-    ) {
-
+    public String deactivateUser(@PathVariable Long id) {
         userService.deactivateUser(id);
-
         return "Deactivate success";
     }
 
     @PutMapping("/{id}/activate")
-    public String activateUser(
-            @PathVariable Long id
-    ) {
-
+    public String activateUser(@PathVariable Long id) {
         userService.activateUser(id);
-
         return "Activate success";
     }
 }

@@ -37,6 +37,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/employer/**").hasRole("EMPLOYER")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/jobs/**").permitAll()
+                        .requestMatchers("/api/v1/candidate/**").hasRole("CANDIDATE")
                         .anyRequest().authenticated()
                 )
                 .cors(Customizer.withDefaults())

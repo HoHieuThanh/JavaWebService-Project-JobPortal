@@ -15,4 +15,6 @@ public interface JobService {
     Page<JobResponse> getPendingJobs(Pageable pageable);
     JobResponse approveJob(Long id);
     JobResponse rejectJob(Long id);
+    Page<JobResponse> getApprovedJobs(String keyword, Pageable pageable);
+    JobResponse getApprovedJobDetail(Long id);
 }

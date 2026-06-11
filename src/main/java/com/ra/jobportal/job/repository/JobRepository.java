@@ -11,5 +11,10 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     Page<Job> findByEmployerUsername(String username, Pageable pageable);
     Page<Job> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
     Page<Job> findByJobStatus(JobStatus status, Pageable pageable);
+    Page<Job> findByJobStatusAndTitleContainingIgnoreCase(
+            JobStatus status,
+            String keyword,
+            Pageable pageable
+    );
 
 }

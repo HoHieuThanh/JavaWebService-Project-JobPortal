@@ -141,6 +141,30 @@ public class JobServiceImpl implements JobService {
         return convertToResponse(job);
     }
 
+    @Override
+    public Page<JobResponse> getApprovedJobs(String keyword,Pageable pageable) {
+        Page<Job> jobs;
+        if (keyword == null || keyword.isBlank()) {
+            jobs = jobRepository.findByJobStatus(JobStatus.APPROVED, pageable);
+        } else {
+            jobs = jobRepository
+                    .findByJobStatusAndTitleContainingIgnoreCase(
+                            JobStatus.APPROVED,
+                            keyword,
+                            pageable
+                    );
+        }
+        return jobs.map(this::convertToResponse);
+    }
+
+    @Override
+    public JobResponse getApprovedJobDetail(Long id) {
+        Job job = jobRepository.findById(id).orElseThrow(() -> new RuntimeException("Job not found"));
+        if (job.getJobStatus() != JobStatus.APPROVED) {
+            throw new RuntimeException("Job not available");}
+        return convertToResponse(job);
+    }
+
     private JobResponse convertToResponse(Job job) {
         return JobResponse.builder()
                 .id(job.getId())

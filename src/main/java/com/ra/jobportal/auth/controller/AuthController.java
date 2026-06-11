@@ -6,6 +6,7 @@ import com.ra.jobportal.auth.dto.request.RegisterRequest;
 import com.ra.jobportal.auth.dto.response.AuthResponse;
 import com.ra.jobportal.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,24 +18,27 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public String register(@RequestBody RegisterRequest request) {
+    public String register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
         return "Register success";
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest request) {
+    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 
     @PostMapping("/refresh")
-    public AuthResponse refreshToken(@RequestBody RefreshTokenRequest request) {
+    public AuthResponse refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         return authService.refreshToken(request);
     }
 
     @PostMapping("/logout")
     public String logout(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new RuntimeException("Invalid Authorization header");
+        }
         String token = header.substring(7);
         authService.logout(token);
         return "Logout success";
