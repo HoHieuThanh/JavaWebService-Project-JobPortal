@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Component
@@ -61,13 +63,7 @@ public class JwtProvider {
     }
 
     public String getUsernameFromToken(String token) {
-
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
+        return extractAllClaims(token).getSubject();
     }
 
     public boolean validateToken(String token) {
@@ -89,5 +85,21 @@ public class JwtProvider {
 
     public long getRefreshExpirationMillis() {
         return refreshExpiration;
+    }
+
+    public LocalDateTime getExpirationDate(String token) {
+        return extractAllClaims(token)
+                .getExpiration()
+                .toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

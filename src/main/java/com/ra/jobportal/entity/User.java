@@ -50,7 +50,6 @@ public class User {
     public void prePersist() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-
         if (status == null) {
             status = UserStatus.ACTIVE;
         }
@@ -61,9 +60,6 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
-    @OneToMany(
-            mappedBy = "employer",
-            cascade = CascadeType.ALL
-    )
+    @OneToMany(mappedBy = "employer", cascade = CascadeType.ALL)
     private List<Job> jobs;
 }

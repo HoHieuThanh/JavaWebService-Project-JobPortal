@@ -4,15 +4,18 @@ import com.ra.jobportal.auth.dto.request.LoginRequest;
 import com.ra.jobportal.auth.dto.request.RefreshTokenRequest;
 import com.ra.jobportal.auth.dto.request.RegisterRequest;
 import com.ra.jobportal.auth.dto.response.AuthResponse;
+import com.ra.jobportal.auth.repository.BlacklistedTokenRepository;
 import com.ra.jobportal.auth.repository.RefreshTokenRepository;
 import com.ra.jobportal.auth.repository.RoleRepository;
 import com.ra.jobportal.auth.service.AuthService;
+import com.ra.jobportal.entity.BlacklistedToken;
 import com.ra.jobportal.entity.RefreshToken;
 import com.ra.jobportal.entity.Role;
 import com.ra.jobportal.entity.User;
 import com.ra.jobportal.entity.enums.RoleName;
 import com.ra.jobportal.user.repository.UserRepository;
 import com.ra.jobportal.security.jwt.JwtProvider;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +26,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -30,6 +34,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final BlacklistedTokenRepository blacklistedTokenRepository;
     private final JwtProvider jwtProvider;
 
     @Override
@@ -137,5 +142,16 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(newAccessToken)
                 .refreshToken(request.getRefreshToken())
                 .build();
+    }
+
+    @Override
+    public void logout(String accessToken) {
+        String username = jwtProvider.getUsernameFromToken(accessToken);
+        refreshTokenRepository.deleteByUserUsername(username);
+        BlacklistedToken token = BlacklistedToken.builder()
+                .token(accessToken)
+                .expiryDate(jwtProvider.getExpirationDate(accessToken))
+                .build();
+        blacklistedTokenRepository.save(token);
     }
 }
