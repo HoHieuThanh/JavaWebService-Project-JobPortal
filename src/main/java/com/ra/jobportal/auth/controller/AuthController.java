@@ -1,13 +1,12 @@
 package com.ra.jobportal.auth.controller;
 
-import com.ra.jobportal.auth.dto.request.LoginRequest;
-import com.ra.jobportal.auth.dto.request.RefreshTokenRequest;
-import com.ra.jobportal.auth.dto.request.RegisterRequest;
+import com.ra.jobportal.auth.dto.request.*;
 import com.ra.jobportal.auth.dto.response.AuthResponse;
 import com.ra.jobportal.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -42,5 +41,49 @@ public class AuthController {
         String token = header.substring(7);
         authService.logout(token);
         return "Logout success";
+    }
+
+    @PutMapping("/change-password")
+    public String changePassword(
+
+            @Valid
+            @RequestBody
+            ChangePasswordRequest request,
+
+            Authentication authentication
+    ) {
+
+        authService.changePassword(
+                request,
+                authentication.getName()
+        );
+
+        return "Đổi mật khẩu thành công";
+    }
+    @PostMapping("/forgot-password")
+    public String forgotPassword(
+            @Valid
+            @RequestBody
+            ForgotPasswordRequest request
+    ) {
+
+        return authService
+                .forgotPassword(
+                        request
+                );
+    }
+    @PostMapping("/reset-password")
+    public String resetPassword(
+            @Valid
+            @RequestBody
+            ResetPasswordRequest request
+    ) {
+
+        authService
+                .resetPassword(
+                        request
+                );
+
+        return "Đổi mật khẩu thành công";
     }
 }

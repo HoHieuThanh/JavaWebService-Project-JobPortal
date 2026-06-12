@@ -1,17 +1,13 @@
 package com.ra.jobportal.auth.service.impl;
 
-import com.ra.jobportal.auth.dto.request.LoginRequest;
-import com.ra.jobportal.auth.dto.request.RefreshTokenRequest;
-import com.ra.jobportal.auth.dto.request.RegisterRequest;
+import com.ra.jobportal.auth.dto.request.*;
 import com.ra.jobportal.auth.dto.response.AuthResponse;
 import com.ra.jobportal.auth.repository.BlacklistedTokenRepository;
+import com.ra.jobportal.auth.repository.PasswordResetTokenRepository;
 import com.ra.jobportal.auth.repository.RefreshTokenRepository;
 import com.ra.jobportal.auth.repository.RoleRepository;
 import com.ra.jobportal.auth.service.AuthService;
-import com.ra.jobportal.entity.BlacklistedToken;
-import com.ra.jobportal.entity.RefreshToken;
-import com.ra.jobportal.entity.Role;
-import com.ra.jobportal.entity.User;
+import com.ra.jobportal.entity.*;
 import com.ra.jobportal.entity.enums.RoleName;
 import com.ra.jobportal.user.repository.UserRepository;
 import com.ra.jobportal.security.jwt.JwtProvider;
@@ -23,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenRepository refreshTokenRepository;
     private final BlacklistedTokenRepository blacklistedTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final JwtProvider jwtProvider;
 
     @Override
@@ -153,5 +151,125 @@ public class AuthServiceImpl implements AuthService {
                 .expiryDate(jwtProvider.getExpirationDate(accessToken))
                 .build();
         blacklistedTokenRepository.save(token);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(
+            ChangePasswordRequest request,
+            String username
+    ) {
+
+        User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(
+                        () -> new RuntimeException(
+                                "User không tồn tại"
+                        )
+                );
+
+        if (!passwordEncoder.matches(
+                request.getOldPassword(),
+                user.getPassword()
+        )) {
+
+            throw new RuntimeException(
+                    "Mật khẩu hiện tại không đúng"
+            );
+        }
+
+        if (request.getOldPassword()
+                .equals(request.getNewPassword())) {
+
+            throw new RuntimeException(
+                    "Mật khẩu mới phải khác mật khẩu cũ"
+            );
+        }
+
+        user.setPassword(
+                passwordEncoder.encode(
+                        request.getNewPassword()
+                )
+        );
+
+        userRepository.save(user);
+    }
+    @Override
+    public String forgotPassword(
+            ForgotPasswordRequest request
+    ) {
+
+        User user =
+                userRepository
+                        .findByEmail(
+                                request.getEmail()
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Email không tồn tại"
+                                )
+                        );
+
+        String token =
+                UUID.randomUUID()
+                        .toString();
+
+        PasswordResetToken resetToken =
+                PasswordResetToken.builder()
+                        .token(token)
+                        .user(user)
+                        .expiryDate(
+                                LocalDateTime.now()
+                                        .plusMinutes(15)
+                        )
+                        .build();
+
+        passwordResetTokenRepository
+                .save(resetToken);
+
+        return token;
+    }
+    @Override
+    @Transactional
+    public void resetPassword(
+            ResetPasswordRequest request
+    ) {
+
+        PasswordResetToken token =
+                passwordResetTokenRepository
+                        .findByToken(
+                                request.getToken()
+                        )
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Token không hợp lệ"
+                                )
+                        );
+
+        if (
+                token.getExpiryDate()
+                        .isBefore(
+                                LocalDateTime.now()
+                        )
+        ) {
+
+            throw new RuntimeException(
+                    "Token hết hạn"
+            );
+        }
+
+        User user =
+                token.getUser();
+
+        user.setPassword(
+                passwordEncoder.encode(
+                        request.getNewPassword()
+                )
+        );
+
+        userRepository.save(user);
+
+        passwordResetTokenRepository
+                .delete(token);
     }
 }
