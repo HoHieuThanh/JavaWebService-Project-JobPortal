@@ -1,5 +1,6 @@
 package com.ra.jobportal.util;
 
+import com.ra.jobportal.exception.BadRequestException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class FileUploadUtil {
             );
             return fileName;
         } catch (IOException e) {
-            throw new RuntimeException("Upload file failed");
+            throw new BadRequestException("Upload file failed");
         }
     }
 }

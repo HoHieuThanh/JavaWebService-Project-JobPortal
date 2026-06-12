@@ -4,6 +4,9 @@ import com.ra.jobportal.entity.Job;
 import com.ra.jobportal.entity.User;
 import com.ra.jobportal.entity.enums.JobStatus;
 import com.ra.jobportal.entity.enums.RoleName;
+import com.ra.jobportal.exception.BadRequestException;
+import com.ra.jobportal.exception.ResourceNotFoundException;
+import com.ra.jobportal.exception.UnauthorizedException;
 import com.ra.jobportal.job.dto.request.CreateJobRequest;
 import com.ra.jobportal.job.dto.request.UpdateJobRequest;
 import com.ra.jobportal.job.dto.response.JobResponse;
@@ -32,7 +35,7 @@ public class JobServiceImpl implements JobService {
         User employer = userRepository
                 .findByUsername(username)
                 .orElseThrow(
-                        () -> new RuntimeException(
+                        () -> new ResourceNotFoundException(
                                 "User not found"
                         )
                 );
@@ -40,7 +43,7 @@ public class JobServiceImpl implements JobService {
         if (employer.getRole().getName()
                 != RoleName.EMPLOYER) {
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Only employer can create job"
             );
         }
@@ -69,9 +72,9 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobResponse getJobDetail(Long id, String username) {
-        Job job = jobRepository.findById(id).orElseThrow(() -> new RuntimeException("Job not found"));
+        Job job = jobRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         if (!job.getEmployer().getUsername().equals(username)) {
-            throw new RuntimeException("Access denied");
+            throw new UnauthorizedException("Access denied");
         }
         return convertToResponse(job);
     }
@@ -79,9 +82,9 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobResponse updateJob(Long id, UpdateJobRequest request, String username) {
         Job job = jobRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         if (!job.getEmployer().getUsername().equals(username)) {
-            throw new RuntimeException("Access denied");
+            throw new UnauthorizedException("Access denied");
         }
         if (request.getTitle() != null) {
             job.setTitle(request.getTitle());
@@ -112,9 +115,9 @@ public class JobServiceImpl implements JobService {
     @Override
     public void deleteJob(Long id, String username) {
         Job job = jobRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         if (!job.getEmployer().getUsername().equals(username)) {
-            throw new RuntimeException("Access denied");
+            throw new UnauthorizedException("Access denied");
         }
         jobRepository.delete(job);
     }
@@ -127,7 +130,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobResponse approveJob(Long id) {
-        Job job = jobRepository.findById(id).orElseThrow(() -> new RuntimeException("Job not found"));
+        Job job = jobRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         job.setJobStatus(JobStatus.APPROVED);
         jobRepository.save(job);
         return convertToResponse(job);
@@ -135,7 +138,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobResponse rejectJob(Long id) {
-        Job job = jobRepository.findById(id).orElseThrow(() -> new RuntimeException("Job not found"));
+        Job job = jobRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         job.setJobStatus(JobStatus.REJECTED);
         jobRepository.save(job);
         return convertToResponse(job);
@@ -159,9 +162,9 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobResponse getApprovedJobDetail(Long id) {
-        Job job = jobRepository.findById(id).orElseThrow(() -> new RuntimeException("Job not found"));
+        Job job = jobRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         if (job.getJobStatus() != JobStatus.APPROVED) {
-            throw new RuntimeException("Job not available");}
+            throw new ResourceNotFoundException("Job not available");}
         return convertToResponse(job);
     }
 

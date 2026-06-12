@@ -10,18 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class ApplicationLoggingAspect {
-
     @AfterReturning(
-            value =
-                    "execution(* com.ra.jobportal.application.service.impl.ApplicationServiceImpl.applyJob(..))",
+            value = "execution(* com.ra.jobportal.application.service.impl.ApplicationServiceImpl.applyJob(..))",
             returning = "result"
     )
-    public void logApplyJob(
-            ApplicationResponse result
-    ) {
-
-        log.info(
-                "Candidate applied jobId={} applicationId={}",
+    public void logApplyJob(ApplicationResponse result) {
+        log.info("Candidate applied jobId={} applicationId={}",
                 result.getJobId(),
                 result.getId()
         );

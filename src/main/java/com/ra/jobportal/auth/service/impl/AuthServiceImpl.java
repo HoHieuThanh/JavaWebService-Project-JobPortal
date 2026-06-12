@@ -9,6 +9,8 @@ import com.ra.jobportal.auth.repository.RoleRepository;
 import com.ra.jobportal.auth.service.AuthService;
 import com.ra.jobportal.entity.*;
 import com.ra.jobportal.entity.enums.RoleName;
+import com.ra.jobportal.exception.BadRequestException;
+import com.ra.jobportal.exception.ResourceNotFoundException;
 import com.ra.jobportal.user.repository.UserRepository;
 import com.ra.jobportal.security.jwt.JwtProvider;
 import jakarta.transaction.Transactional;
@@ -39,11 +41,11 @@ public class AuthServiceImpl implements AuthService {
     public void register(RegisterRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new BadRequestException("Username already exists");
         }
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new BadRequestException("Email already exists");
         }
 
         Role role = roleRepository
@@ -53,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
                         )
                 )
                 .orElseThrow(
-                        () -> new RuntimeException("Role not found")
+                        () -> new ResourceNotFoundException("Role not found")
                 );
 
         User user = User.builder()
@@ -82,7 +84,7 @@ public class AuthServiceImpl implements AuthService {
         );
 
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         String accessToken = jwtProvider.generateToken(request.getUsername());
         String refreshToken = jwtProvider.generateRefreshToken(request.getUsername());
@@ -115,7 +117,7 @@ public class AuthServiceImpl implements AuthService {
                                 request.getRefreshToken()
                         )
                         .orElseThrow(
-                                () -> new RuntimeException(
+                                () -> new ResourceNotFoundException(
                                         "Refresh token invalid"
                                 )
                         );
@@ -123,7 +125,7 @@ public class AuthServiceImpl implements AuthService {
         if (refreshToken.getExpiryDate()
                 .isBefore(LocalDateTime.now())) {
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Refresh token expired"
             );
         }
@@ -163,7 +165,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository
                 .findByUsername(username)
                 .orElseThrow(
-                        () -> new RuntimeException(
+                        () -> new ResourceNotFoundException(
                                 "User không tồn tại"
                         )
                 );
@@ -173,7 +175,7 @@ public class AuthServiceImpl implements AuthService {
                 user.getPassword()
         )) {
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Mật khẩu hiện tại không đúng"
             );
         }
@@ -181,7 +183,7 @@ public class AuthServiceImpl implements AuthService {
         if (request.getOldPassword()
                 .equals(request.getNewPassword())) {
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Mật khẩu mới phải khác mật khẩu cũ"
             );
         }
@@ -205,7 +207,7 @@ public class AuthServiceImpl implements AuthService {
                                 request.getEmail()
                         )
                         .orElseThrow(
-                                () -> new RuntimeException(
+                                () -> new ResourceNotFoundException(
                                         "Email không tồn tại"
                                 )
                         );
@@ -241,7 +243,7 @@ public class AuthServiceImpl implements AuthService {
                                 request.getToken()
                         )
                         .orElseThrow(
-                                () -> new RuntimeException(
+                                () -> new ResourceNotFoundException(
                                         "Token không hợp lệ"
                                 )
                         );
@@ -253,7 +255,7 @@ public class AuthServiceImpl implements AuthService {
                         )
         ) {
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Token hết hạn"
             );
         }

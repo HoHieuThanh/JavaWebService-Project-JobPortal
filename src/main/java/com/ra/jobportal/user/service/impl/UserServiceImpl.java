@@ -2,6 +2,8 @@ package com.ra.jobportal.user.service.impl;
 
 import com.ra.jobportal.entity.User;
 import com.ra.jobportal.entity.enums.UserStatus;
+import com.ra.jobportal.exception.BadRequestException;
+import com.ra.jobportal.exception.ResourceNotFoundException;
 import com.ra.jobportal.user.dto.response.UserResponse;
 import com.ra.jobportal.user.repository.UserRepository;
 import com.ra.jobportal.user.service.UserService;
@@ -51,7 +53,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository
                 .findById(id)
                 .orElseThrow(
-                        () -> new RuntimeException(
+                        () -> new ResourceNotFoundException(
                                 "User not found"
                         )
                 );
@@ -67,7 +69,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository
                 .findById(id)
                 .orElseThrow(
-                        () -> new RuntimeException(
+                        () -> new ResourceNotFoundException(
                                 "User not found"
                         )
                 );
@@ -83,7 +85,7 @@ public class UserServiceImpl implements UserService {
 
         if (file.isEmpty()) {
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "File không được để trống"
             );
         }
@@ -98,7 +100,7 @@ public class UserServiceImpl implements UserService {
                 )
         ) {
 
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Chỉ chấp nhận file PDF"
             );
         }
@@ -107,7 +109,7 @@ public class UserServiceImpl implements UserService {
                 userRepository
                         .findByUsername(username)
                         .orElseThrow(
-                                () -> new RuntimeException(
+                                () -> new ResourceNotFoundException(
                                         "User không tồn tại"
                                 )
                         );

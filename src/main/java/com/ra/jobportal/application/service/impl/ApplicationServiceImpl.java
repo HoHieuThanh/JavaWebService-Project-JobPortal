@@ -11,6 +11,9 @@ import com.ra.jobportal.entity.User;
 import com.ra.jobportal.entity.enums.ApplicationStatus;
 import com.ra.jobportal.entity.enums.JobStatus;
 import com.ra.jobportal.entity.enums.RoleName;
+import com.ra.jobportal.exception.BadRequestException;
+import com.ra.jobportal.exception.ResourceNotFoundException;
+import com.ra.jobportal.exception.UnauthorizedException;
 import com.ra.jobportal.job.repository.JobRepository;
 import com.ra.jobportal.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,20 +30,20 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public ApplicationResponse applyJob(Long jobId, String username) {
-        User candidate = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User candidate = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
         if (candidate.getRole().getName() != RoleName.CANDIDATE) {
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Only candidate can apply"
             );
         }
 
-        Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+        Job job = jobRepository.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         if (job.getJobStatus() != JobStatus.APPROVED) {
-            throw new RuntimeException("Job not available");
+            throw new ResourceNotFoundException("Job not available");
         }
 
         if (applicationRepository.existsByCandidateIdAndJobId(candidate.getId(), jobId)) {
-            throw new RuntimeException("Already applied");
+            throw new BadRequestException("Already applied");
         }
 
         Application application =
@@ -63,18 +66,18 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public ApplicationResponse
     getApplicationDetail(Long id, String username) {
-        Application application = applicationRepository.findById(id).orElseThrow(() -> new RuntimeException("Application not found"));
+        Application application = applicationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Application not found"));
         if (!application.getCandidate().getUsername().equals(username)) {
-            throw new RuntimeException("Access denied");
+            throw new UnauthorizedException("Access denied");
         }
         return convertToResponse(application);
     }
 
     @Override
     public Page<EmployerApplicationResponse> getApplicationsByJob(Long jobId, String employerUsername, Pageable pageable) {
-        Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+        Job job = jobRepository.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job not found"));
         if (!job.getEmployer().getUsername().equals(employerUsername)) {
-            throw new RuntimeException("Access denied");
+            throw new UnauthorizedException("Access denied");
         }
 
         return applicationRepository.findByJobId(jobId, pageable)
@@ -89,14 +92,14 @@ public class ApplicationServiceImpl implements ApplicationService {
             String employerUsername
     ) {
         Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
         Job job = application.getJob();
         if (!job.getEmployer().getUsername().equals(employerUsername)) {
-            throw new RuntimeException("Access denied");
+            throw new UnauthorizedException("Access denied");
         }
 
         if (request.getStatus() == ApplicationStatus.PENDING) {
-            throw new RuntimeException("Invalid status");
+            throw new BadRequestException("Invalid status");
         }
         application.setStatus(request.getStatus());
         applicationRepository.save(application);

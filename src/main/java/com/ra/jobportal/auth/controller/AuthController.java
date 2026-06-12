@@ -3,6 +3,7 @@ package com.ra.jobportal.auth.controller;
 import com.ra.jobportal.auth.dto.request.*;
 import com.ra.jobportal.auth.dto.response.AuthResponse;
 import com.ra.jobportal.auth.service.AuthService;
+import com.ra.jobportal.exception.BadRequestException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class AuthController {
     public String logout(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {
-            throw new RuntimeException("Invalid Authorization header");
+            throw new BadRequestException("Invalid Authorization header");
         }
         String token = header.substring(7);
         authService.logout(token);
