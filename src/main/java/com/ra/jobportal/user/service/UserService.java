@@ -13,4 +13,7 @@ public interface UserService {
     String uploadCv(MultipartFile file, String username);
     UserResponse getUserDetail(Long id);
     void deleteUser(Long id);
+
+    UserResponse getProfile(String username);
+    UserResponse updateProfile(com.ra.jobportal.user.dto.request.UpdateProfileRequest request, String username);
 }

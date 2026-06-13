@@ -29,6 +29,12 @@ public class CandidateApplicationController {
                 );
     }
 
+    @GetMapping("/my-applications")
+    public Page<ApplicationResponse>
+    getMyApplicationsAlias(Authentication authentication, Pageable pageable) {
+        return getMyApplications(authentication, pageable);
+    }
+
     @GetMapping("/{id}")
     public ApplicationResponse
     getApplicationDetail(@PathVariable Long id, Authentication authentication) {

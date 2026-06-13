@@ -22,6 +22,12 @@ public class EmployerApplicationController {
         return applicationService.getApplicationsByJob(jobId, authentication.getName(), pageable);
     }
 
+    @GetMapping("/{id}")
+    public EmployerApplicationResponse
+    getApplicationDetail(@PathVariable Long id, Authentication authentication) {
+        return applicationService.getApplicationDetailForEmployer(id, authentication.getName());
+    }
+
     @PutMapping("/{id}/status")
     public EmployerApplicationResponse
     updateStatus(@PathVariable Long id, @RequestBody UpdateApplicationStatusRequest request, Authentication authentication) {

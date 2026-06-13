@@ -1,5 +1,7 @@
 package com.ra.jobportal.user.controller;
 
+import com.ra.jobportal.user.dto.request.UpdateProfileRequest;
+import com.ra.jobportal.user.dto.response.UserResponse;
 import com.ra.jobportal.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -30,5 +32,15 @@ public class CandidateProfileController {
                 file,
                 authentication.getName()
         );
+    }
+
+    @GetMapping
+    public UserResponse getProfile(Authentication authentication) {
+        return userService.getProfile(authentication.getName());
+    }
+
+    @PutMapping
+    public UserResponse updateProfile(@RequestBody UpdateProfileRequest request, Authentication authentication) {
+        return userService.updateProfile(request, authentication.getName());
     }
 }

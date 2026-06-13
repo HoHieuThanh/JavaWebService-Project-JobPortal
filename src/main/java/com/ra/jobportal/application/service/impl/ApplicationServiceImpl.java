@@ -106,6 +106,17 @@ public class ApplicationServiceImpl implements ApplicationService {
         return convertToEmployerResponse(application);
     }
 
+    @Override
+    public EmployerApplicationResponse getApplicationDetailForEmployer(Long id, String employerUsername) {
+        Application application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
+        Job job = application.getJob();
+        if (!job.getEmployer().getUsername().equals(employerUsername)) {
+            throw new UnauthorizedException("Access denied");
+        }
+        return convertToEmployerResponse(application);
+    }
+
     private ApplicationResponse convertToResponse(Application application) {
         return ApplicationResponse.builder()
                 .id(application.getId())

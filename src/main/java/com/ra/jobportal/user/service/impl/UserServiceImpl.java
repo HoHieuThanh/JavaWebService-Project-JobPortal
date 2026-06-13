@@ -155,6 +155,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserResponse getProfile(String username) {
+        User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new com.ra.jobportal.exception.ResourceNotFoundException("User not found"));
+        return convertToResponse(user);
+    }
+
+    @Override
+    public UserResponse updateProfile(com.ra.jobportal.user.dto.request.UpdateProfileRequest request, String username) {
+        User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new com.ra.jobportal.exception.ResourceNotFoundException("User not found"));
+
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName());
+        }
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+
+        userRepository.save(user);
+
+        return convertToResponse(user);
+    }
+
+    @Override
     public void deleteUser(Long id) {
 
         User user = userRepository

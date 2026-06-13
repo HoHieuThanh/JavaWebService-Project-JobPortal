@@ -15,6 +15,8 @@ public interface ApplicationService {
             String employerUsername,
             Pageable pageable
     );
+
+    EmployerApplicationResponse getApplicationDetailForEmployer(Long id, String employerUsername);
     EmployerApplicationResponse updateApplicationStatus(
             Long applicationId,
             UpdateApplicationStatusRequest request,
