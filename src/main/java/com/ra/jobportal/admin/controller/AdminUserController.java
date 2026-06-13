@@ -29,4 +29,15 @@ public class AdminUserController {
         userService.activateUser(id);
         return "Activate success";
     }
+
+    @GetMapping("/{id}")
+    public UserResponse getUserDetail(@PathVariable Long id) {
+        return userService.getUserDetail(id);
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return "Delete success";
+    }
 }

@@ -7,6 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import com.ra.jobportal.entity.User;
+import java.util.List;
+
 public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
     Page<Job> findByEmployerUsername(String username, Pageable pageable);
     Page<Job> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
@@ -17,4 +20,5 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
             Pageable pageable
     );
 
+    List<Job> findByEmployer(User employer);
 }
